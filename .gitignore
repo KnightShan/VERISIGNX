@@ -27,45 +27,41 @@ ENV/
 .venv
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
-# Project specific - Results and outputs
-*_Results/
+# Project-specific
+# Results and output directories
 **/Results/
-**/ocr_crops/
-**/linesweep/
-**/uploads/
-**/ConnectedComponents_Results/
-**/LineSweep_Results/
-**/OCR_Results/
+**/*_Results/
+ConnectedComponents_Results/
+LineSweep_Results/
+OCR_Results/
+linesweep/
+ocr_crops/
+uploads/
 
-# Model files (these are large and can be regenerated)
+# Model files (can be regenerated)
 *.pkl
 *.h5
-*.hdf5
-*.model
+*.pb
 model_wrapper_backup.pkl
 
-# Dataset (comment out if you want to include dataset)
+# Dataset files (too large for GitHub, use Git LFS if needed)
 Dataset/
-**/Data/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Environment variables
-.env
-.env.local
 
 # Logs
 *.log
 
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
 
