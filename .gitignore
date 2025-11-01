@@ -34,24 +34,26 @@ ENV/
 *~
 
 # Project-specific
-# Results and output directories
-**/Results/
-**/*_Results/
-ConnectedComponents_Results/
-LineSweep_Results/
-OCR_Results/
-linesweep/
-ocr_crops/
+# Results and output directories (commented out - including them)
+# **/Results/
+# **/*_Results/
+# ConnectedComponents_Results/
+# LineSweep_Results/
+# OCR_Results/
+# linesweep/
+# ocr_crops/
+
+# Upload directory (temporary user uploads)
 uploads/
 
-# Model files (can be regenerated)
-*.pkl
-*.h5
-*.pb
-model_wrapper_backup.pkl
+# Model files (commented out - including them)
+# *.pkl
+# *.h5
+# *.pb
+# model_wrapper_backup.pkl
 
-# Dataset files (too large for GitHub, use Git LFS if needed)
-Dataset/
+# Dataset files (including Dataset directory)
+# Dataset/
 
 # Logs
 *.log
