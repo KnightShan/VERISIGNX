@@ -53,6 +53,10 @@ env/
 ~$*.pptx
 ~$*.docx
 
+# Presentation files
+VeriSignX.pptx
+*.pptx
+
 # Flask
 instance/
 .webassets-cache
