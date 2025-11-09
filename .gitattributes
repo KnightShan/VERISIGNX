@@ -1,0 +1,22 @@
+# Git LFS tracking for large files
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
+
+# Dataset folder
+Dataset/** filter=lfs diff=lfs merge=lfs -text
+
+# Results folders
+Code/Detection/OCR/OCR_Results/** filter=lfs diff=lfs merge=lfs -text
+"Code/Detection/Line Sweep/LineSweep_Results/**" filter=lfs diff=lfs merge=lfs -text
+"Code/Detection/Connected Components/ConnectedComponents_Results/**" filter=lfs diff=lfs merge=lfs -text
+
+# Verification data
+Code/Verification/SVM/Data/** filter=lfs diff=lfs merge=lfs -text
+Code/Verification/SVM/ocr_crops/** filter=lfs diff=lfs merge=lfs -text
+Code/Verification/SVM/linesweep/** filter=lfs diff=lfs merge=lfs -text
+Code/Verification/SVM/uploads/** filter=lfs diff=lfs merge=lfs -text

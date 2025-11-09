@@ -1,46 +1,22 @@
-"""
-train.py
-
-Train a LinearSVC on signature features (SIFT visual words histogram + 12 contour features)
-and save a single model file "model.pkl" that contains the classifier, scaler and vocabulary.
-
-Usage:
-    python train.py
-
-Requirements:
-    pip install opencv-contrib-python scipy scikit-learn pillow numpy
-"""
-
 import os
 import pickle
 from pathlib import Path
 import numpy as np
-import random
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from scipy.cluster.vq import kmeans, vq
 import cv2
-
-# Import your project modules (must be in same folder or on PYTHONPATH)
 import preprocess
 import features
 
-# ----------------- Configuration -----------------
 GenuineFolder = "Data/genuine"
 ForgedFolder  = "Data/forged"
 
-# target visual vocabulary size (desired). If not enough descriptors, k will be lowered.
 DESIRED_K = 500
-
-# speed / memory: if you have tons of descriptors, sample at most this many for kmeans
 MAX_DESCRIPTOR_SAMPLE = 20000
-
-# kmeans iterations (1 is fast; increase to 5 if you want better centroids at cost of time)
 KMEANS_ITERS = 1
 
-# Output model filename (single file as requested)
 MODEL_PATH = Path("model.pkl")
-# --------------------------------------------------
 
 def list_images(folder):
     p = Path(folder)
@@ -50,9 +26,7 @@ def list_images(folder):
     return [str(p / f) for f in sorted(os.listdir(p)) if Path(f).suffix.lower() in exts]
 
 def safe_sift_descriptors(img):
-    """Return SIFT descriptors for a preprocessed image (or None)."""
     try:
-        # create SIFT
         sift = cv2.SIFT_create()
     except Exception:
         try:
@@ -61,7 +35,6 @@ def safe_sift_descriptors(img):
             return None
     if img is None:
         return None
-    # ensure uint8 single-channel
     if img.dtype != np.uint8:
         img = (np.clip(img, 0, 255)).astype(np.uint8)
     if img.ndim == 3:
@@ -72,12 +45,6 @@ def safe_sift_descriptors(img):
     return des
 
 class ModelWrapper:
-    """
-    Wrapper to hold classifier, scaler and vocabulary in one object.
-    - predict(X): accepts feature matrix X (n_samples x (k + 12)).
-      If X appears unscaled, wrapper will apply stored scaler before calling classifier.
-      If X appears already scaled (mean near zero), wrapper will call classifier directly.
-    """
     def __init__(self, clf, scaler, voc, k):
         self.clf = clf
         self.scaler = scaler
@@ -93,22 +60,14 @@ class ModelWrapper:
         if X.shape[1] != expected_dim:
             raise ValueError(f"Feature dimension mismatch: model expects {expected_dim} but got {X.shape[1]}")
 
-        # detect if features look already scaled: if column means are near 0, assume scaled.
         col_means = np.mean(X, axis=0)
         if np.max(np.abs(col_means)) < 1e-3:
-            # looks scaled already -> pass through
             return self.clf.predict(X)
         else:
-            # apply stored scaler then predict
             Xs = self.scaler.transform(X)
             return self.clf.predict(Xs)
 
-    # helper: turn descriptors->histogram using stored voc (if needed)
     def descriptors_to_histogram(self, descriptors):
-        """
-        descriptors: ndarray of shape (n_desc, desc_dim)
-        returns histogram vector of length self.k
-        """
         if descriptors is None or len(descriptors) == 0:
             return np.zeros(self.k, dtype=float)
         words, _ = vq(descriptors, self.voc)
@@ -119,10 +78,6 @@ class ModelWrapper:
         return hist
 
 def build_features_for_paths(paths, voc, k):
-    """
-    Build feature matrix for a list of image paths using the given vocabulary 'voc' and k.
-    Returns numpy array shape (n_images, k + 12).
-    """
     feats = []
     for p in paths:
         try:
@@ -130,7 +85,6 @@ def build_features_for_paths(paths, voc, k):
         except Exception:
             pre = None
 
-        # contour features (12 dims)
         try:
             ar, b_area, ch_area, ct_area = features.get_contour_features(pre.copy(), display=False)
         except Exception:
@@ -161,7 +115,6 @@ def build_features_for_paths(paths, voc, k):
         contour12 = [ar, hull_over_bound, contour_over_bound,
                      ratio, c0, c1, ecc, sol, skx, sky, ktx, kty]
 
-        # descriptors -> histogram
         des = safe_sift_descriptors(pre)
         if des is None or len(des) == 0:
             hist = np.zeros(k, dtype=float)
@@ -177,7 +130,6 @@ def build_features_for_paths(paths, voc, k):
     return np.vstack(feats)
 
 def main():
-    # Collect paths
     genuine = list_images(GenuineFolder)
     forged  = list_images(ForgedFolder)
 
@@ -188,9 +140,8 @@ def main():
     print(f"Found {len(genuine)} genuine and {len(forged)} forged images.")
 
     all_paths = genuine + forged
-    labels = np.array([2]*len(genuine) + [1]*len(forged))  # keep your convention: 2=genuine,1=forged
+    labels = np.array([2]*len(genuine) + [1]*len(forged))
 
-    # 1) Extract per-image descriptors (SIFT) and collect descriptor pool
     per_image_des = []
     descriptor_pool = []
     print("Extracting SIFT descriptors and contour features (this may take time)...")
@@ -211,14 +162,12 @@ def main():
     total_desc = descriptors_all.shape[0]
     print("Total SIFT descriptors collected:", total_desc)
 
-    # sample descriptors for kmeans if needed
     if total_desc > MAX_DESCRIPTOR_SAMPLE:
         idxs = np.random.choice(total_desc, MAX_DESCRIPTOR_SAMPLE, replace=False)
         descriptors_for_kmeans = descriptors_all[idxs]
     else:
         descriptors_for_kmeans = descriptors_all
 
-    # choose effective k
     effective_k = min(DESIRED_K, descriptors_for_kmeans.shape[0])
     if effective_k < 2:
         raise SystemExit("Not enough descriptors to build vocabulary (k < 2).")
@@ -227,22 +176,18 @@ def main():
     voc, var = kmeans(descriptors_for_kmeans.astype(float), effective_k, KMEANS_ITERS)
     print("kmeans complete. voc shape:", voc.shape)
 
-    # 2) Build full feature matrix using vocabulary
     print("Building final feature matrix...")
     X = build_features_for_paths(all_paths, voc, effective_k)
     print("Feature matrix shape:", X.shape)
 
-    # 3) Fit global scaler and scale
     scaler = StandardScaler().fit(X)
     Xs = scaler.transform(X)
 
-    # 4) Train classifier
     print("Training LinearSVC...")
     clf = LinearSVC(max_iter=20000)
     clf.fit(Xs, labels)
     print("Training finished.")
 
-    # 5) wrap everything into a single object and save as model.pkl
     wrapper = ModelWrapper(clf, scaler, voc, effective_k)
     with open(MODEL_PATH, "wb") as f:
         pickle.dump(wrapper, f)

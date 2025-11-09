@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VERISIGNX - AI Signature Verification</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <!-- Animated Background -->
+    </head>
+    <body>
     <div class="background-animation">
         <div class="circle circle-1"></div>
         <div class="circle circle-2"></div>
@@ -15,7 +14,6 @@
     </div>
 
     <div class="container">
-        <!-- Header -->
         <header>
             <div class="header-content">
                 <div class="logo-section">
@@ -32,7 +30,6 @@
                 </div>
                 <p class="tagline">AI-Driven Signature Verification for Fraud-Resistant Cheque Processing</p>
 
-                <!-- Feature Pills -->
                 <div class="feature-pills">
                     <span class="pill">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -57,9 +54,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main>
-            <!-- Upload Section -->
             <div class="upload-section" id="uploadSection">
                 <div class="section-header">
                     <h2>Upload Signature</h2>
@@ -101,7 +96,6 @@
                 </form>
             </div>
 
-            <!-- Processing Animation -->
             <div class="processing-animation" id="processingAnimation" style="display: none;">
                 <div class="processing-header">
                     <h2>Processing Your Signature</h2>
@@ -187,7 +181,6 @@
                 </div>
             </div>
 
-            <!-- Results Section -->
             {% if verdict %}
             <div class="results-section">
                 <div class="result-card {% if 'Genuine' in verdict %}genuine{% else %}fake{% endif %}">
@@ -240,7 +233,6 @@
             {% endif %}
         </main>
 
-        <!-- Footer -->
         <footer>
             <div class="footer-content">
                 <div class="footer-section">

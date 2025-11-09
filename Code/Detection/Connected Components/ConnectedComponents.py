@@ -5,37 +5,36 @@ import random
 import numpy as np
 import cv2
 from pathlib import Path
-from UnionArray import *   # your union-find implementation
+from UnionArray import *
 
 
 def run(img):
     data = img.load()
     width, height = img.size
 
-    uf = UFarray()   # union-find
+    uf = UFarray()
     labels = {}
 
     for y in range(height):
         for x in range(width):
-            if data[x, y] == 255:  # white = background
+            if data[x, y] == 255:
                 continue
 
-            # check neighbors (a,b,c,d relative to e)
-            if y > 0 and data[x, y - 1] == 0:        # b
+            if y > 0 and data[x, y - 1] == 0:
                 labels[(x, y)] = labels[(x, y - 1)]
-            elif x + 1 < width and y > 0 and data[x + 1, y - 1] == 0:   # c
+            elif x + 1 < width and y > 0 and data[x + 1, y - 1] == 0:
                 c = labels[(x + 1, y - 1)]
                 labels[(x, y)] = c
-                if x > 0 and data[x - 1, y - 1] == 0:   # a
+                if x > 0 and data[x - 1, y - 1] == 0:
                     uf.union(c, labels[(x - 1, y - 1)])
-                elif x > 0 and data[x - 1, y] == 0:     # d
+                elif x > 0 and data[x - 1, y] == 0:
                     uf.union(c, labels[(x - 1, y)])
-            elif x > 0 and y > 0 and data[x - 1, y - 1] == 0:   # a
+            elif x > 0 and y > 0 and data[x - 1, y - 1] == 0:
                 labels[(x, y)] = labels[(x - 1, y - 1)]
-            elif x > 0 and data[x - 1, y] == 0:         # d
+            elif x > 0 and data[x - 1, y] == 0:
                 labels[(x, y)] = labels[(x - 1, y)]
             else:
-                labels[(x, y)] = uf.makeLabel()  # new component
+                labels[(x, y)] = uf.makeLabel()
 
     uf.flatten()
 
@@ -70,7 +69,6 @@ def cropByConnectedComponent(points, temp, filename):
         print(f"  WARNING: no valid components found for {filename}")
         return
 
-    # pick largest component
     (x, y, w, h), _ = max(sig.items(), key=operator.itemgetter(1))
     temp_np = temp[y:y + h, x:x + w]
 
@@ -82,7 +80,7 @@ def cropByConnectedComponent(points, temp, filename):
 
 
 def main():
-    images_dir = r"C:\Users\Shantanu\OneDrive\Desktop\Fake Sign Detection\Code\Detection\OCR\OCR_Results"   # input folder with images
+    images_dir = "../OCR/OCR_Results"
     input_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), images_dir)
 
     if not os.path.isdir(input_path):
@@ -110,7 +108,6 @@ def main():
         img = Image.open(file_path)
         temp = np.array(img)
 
-        # binarize
         grayscale = img.convert("L")
         _, thresh = cv2.threshold(np.array(grayscale), 127, 255, cv2.THRESH_BINARY_INV)
 
@@ -118,7 +115,6 @@ def main():
 
         labels, _ = run(img_bin)
 
-        # group points by component
         points = {}
         for k, v in labels.items():
             points.setdefault(v, []).append(k)

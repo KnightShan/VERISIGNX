@@ -6,29 +6,20 @@ from skimage.filters import threshold_otsu
 
 
 def rgbgrey(img):
-    """Convert RGB image to grayscale."""
-    if img.ndim == 3:  # color
+    if img.ndim == 3:
         return np.mean(img, axis=2)
-    return img  # already grayscale
+    return img
 
 
 def greybin(img):
-    """Convert grayscale to binary using Gaussian blur + Otsu threshold."""
     blur_radius = 0.8
     img = ndimage.gaussian_filter(img, blur_radius)
     thres = threshold_otsu(img)
     binimg = img > thres
-    return np.logical_not(binimg)  # invert: signature=white, bg=black
+    return np.logical_not(binimg)
 
 
 def preproc(path=None, img=None, display=True):
-    """
-    Preprocess a signature image:
-    - grayscale
-    - binarize
-    - crop to bounding box
-    - return binary uint8 image (0/255)
-    """
     if img is None:
         import matplotlib.image as mpimg
         img = mpimg.imread(path)

@@ -31,7 +31,7 @@ def main():
         print("Processing", filename)
 
         img = Image.open(file_path)
-        temp = np.array(img)  # original for cropping
+        temp = np.array(img)
         grayscale = img.convert("L")
 
         _, thresh = cv2.threshold(np.array(grayscale), 128, 255, cv2.THRESH_BINARY_INV)
@@ -40,7 +40,6 @@ def main():
         indexStartX = indexEndX = 0
         indexStartY = indexEndY = 0
 
-        # Vertical sweep
         flagx = 0
         for i in range(rows):
             line = thresh[i, :]
@@ -51,7 +50,6 @@ def main():
                 indexEndX = i
                 break
 
-        # Horizontal sweep
         flagy = 0
         for j in range(cols):
             line = thresh[indexStartX:indexEndX, j:j + 20]
@@ -62,12 +60,10 @@ def main():
                 indexEndY = j
                 break
 
-        # Safety check
         if indexEndX <= indexStartX or indexEndY <= indexStartY:
             print(f"  WARNING: No valid content found in {filename}, skipping.")
             continue
 
-        # Draw rectangle (convert thresh to BGR for colored lines)
         thresh_bgr = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
         cv2.rectangle(
             thresh_bgr,
@@ -77,10 +73,8 @@ def main():
             2,
         )
 
-        # Crop
         temp_np = temp[indexStartX:indexEndX, indexStartY:indexEndY]
 
-        # Save results
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LineSweep_Results")
         os.makedirs(path, exist_ok=True)
 

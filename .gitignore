@@ -19,11 +19,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
 .venv
 
 # IDE
@@ -32,38 +33,42 @@ ENV/
 *.swp
 *.swo
 *~
-
-# Project-specific
-# Results and output directories (commented out - including them)
-# **/Results/
-# **/*_Results/
-# ConnectedComponents_Results/
-# LineSweep_Results/
-# OCR_Results/
-# linesweep/
-# ocr_crops/
-
-# Upload directory (temporary user uploads)
-uploads/
-
-# Model files (commented out - including them)
-# *.pkl
-# *.h5
-# *.pb
-# model_wrapper_backup.pkl
-
-# Dataset files (including Dataset directory)
-# Dataset/
-
-# Logs
-*.log
-
-# OS
 .DS_Store
-Thumbs.db
-desktop.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+
+# Model files (uncomment if you don't want to track model files)
+# *.pkl
+# model.pkl
+# model_wrapper_backup.pkl
 
 # Temporary files
 *.tmp
-*.temp
+*.log
+~$*.pptx
+~$*.docx
+
+# Flask
+instance/
+.webassets-cache
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Uploads (uncomment if you don't want to track uploads)
+# uploads/
+# ocr_crops/
+# linesweep/
+
+# Results folders (uncomment if you don't want to track results)
+# Code/Detection/OCR/OCR_Results/
+# Code/Detection/Line Sweep/LineSweep_Results/
+# Code/Detection/Connected Components/ConnectedComponents_Results/
 

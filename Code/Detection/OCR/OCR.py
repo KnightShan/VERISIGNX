@@ -1,7 +1,9 @@
 try:
     from PIL import Image
+    PILImage = Image
 except ImportError:
     import Image
+    PILImage = Image
 
 import pytesseract
 import cv2
@@ -9,20 +11,14 @@ import os
 import numpy as np
 from pathlib import Path
 
-# If you installed Tesseract at a non-default location on Windows,
-# set the path only if it exists. Otherwise comment/remove this line.
 possible_tess_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 if os.path.exists(possible_tess_path):
     pytesseract.pytesseract.tesseract_cmd = possible_tess_path
 else:
-    # Uncomment and set a different path if needed
-    # pytesseract.pytesseract.tesseract_cmd = r"C:\Path\to\tesseract.exe"
     pass
 
-# Use a raw string or forward slashes for Windows absolute path
-images_dir = r"C:\Users\Shantanu\OneDrive\Desktop\Fake Sign Detection\Dataset\IDRBT_Cheque_Image_Dataset\300"
+images_dir = "../Dataset/IDRBT_Cheque_Image_Dataset"
 
-# Build input_path: if images_dir is absolute, use it; otherwise treat relative to this script
 script_dir = Path(__file__).resolve().parent
 if os.path.isabs(images_dir):
     input_path = Path(images_dir)
@@ -34,7 +30,6 @@ if not input_path.exists():
     print("Create the folder and add images, or correct images_dir.")
     exit(1)
 
-# Output folder alongside this script
 output_path = script_dir / "OCR_Results"
 output_path.mkdir(parents=True, exist_ok=True)
 
@@ -47,7 +42,6 @@ for filename in sorted(os.listdir(input_path)):
     total_files += 1
     file_path = input_path / filename
     if file_path.suffix.lower() not in ALLOWED_EXT:
-        # skip non-image files
         continue
 
     print("OCR Processing file -", filename)
@@ -58,13 +52,11 @@ for filename in sorted(os.listdir(input_path)):
 
     h, w = img.shape[:2]
 
-    # color thresholding (your HSV mask)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower = np.array([103, 79, 60])
     upper = np.array([129, 255, 255])
     mask = cv2.inRange(hsv, lower, upper)
 
-    # remove tiny contours
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     for c in cnts:
@@ -74,7 +66,6 @@ for filename in sorted(os.listdir(input_path)):
     mask = 255 - mask
     mask = cv2.GaussianBlur(mask, (3, 3), 0)
 
-    # OCR data — skip header line when parsing
     tdata = pytesseract.image_to_data(PILImage.open(str(file_path)))
     lines = tdata.splitlines()
     pleaseCd = [0, 0, 0, 0]
@@ -83,7 +74,7 @@ for filename in sorted(os.listdir(input_path)):
     above = 0
     sign = 0
 
-    for d in lines[1:]:  # skip header
+    for d in lines[1:]:
         parts = d.split("\t")
         if len(parts) != 12:
             continue
@@ -106,7 +97,6 @@ for filename in sorted(os.listdir(input_path)):
         elif tl == "sign":
             sign += 1
 
-        # IFSC-like detection from your logic
         if len(text) == 11:
             prefix = text[:4]
             if prefix in {"SYNB", "SBIN", "HDFC", "CNRB", "PUNB", "UTIB", "ICIC"}:
@@ -135,7 +125,6 @@ for filename in sorted(os.listdir(input_path)):
     crop_w = int((scaleXL + scaleXR + 1) * lengthSign)
     crop_h = int(scaleY * lengthSign)
 
-    # clamp to image bounds
     x1 = max(0, x1)
     y1 = max(0, y1)
     x2 = min(w, x1 + max(1, crop_w))
